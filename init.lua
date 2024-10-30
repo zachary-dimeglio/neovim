@@ -91,7 +91,12 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
+
+-- Interpret .h files as C sources (in bottom right)
+vim.g.c_syntax_for_h = 1
+-- Editorconfig disiable
+-- vim.g.editorconfig = false
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -109,6 +114,10 @@ vim.opt.mouse = 'a'
 
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
+
+-- Vim indent settings
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
 
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
@@ -229,7 +238,7 @@ vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  --  'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -605,9 +614,15 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
+        clangd = {
+          cmd = {
+            'clangd',
+            '--function-arg-placeholders=0',
+            '--query-driver=/usr/local/mcuxpressoide-11.8.1_1197/ide/plugins/com.nxp.mcuxpresso.tools.linux_11.8.1.202308071233/tools/bin/arm-none-eabi-*,/home/zdimeglio/xtensa/XtDevTools/install/tools/RI-2021.8-linux/XtensaTools/bin/xt-*',
+          },
+        },
         -- gopls = {},
-        -- pyright = {},
+        pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -829,13 +844,13 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
+    'catppuccin/nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     init = function()
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'catppuccin'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
@@ -913,7 +928,46 @@ require('lazy').setup({
   -- place them in the correct locations.
 
   -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
-  --
+
+  -- Plugin for easy block commenting
+  {
+    'numToStr/Comment.nvim',
+    opts = {
+      -- add any options here
+    },
+    config = function()
+      require('Comment').setup()
+    end,
+  },
+
+  --Plugin for function hints as you type
+  {
+    'ray-x/lsp_signature.nvim',
+    -- event = 'VeryLazy',
+    -- opts = {
+    --   bind = true,
+    --   handler_opts = {
+    --     border = 'rounded',
+    --   },
+    -- },
+    config = function()
+      require('lsp_signature').setup()
+    end,
+  },
+
+  --Plugin for integrated file tree
+  {
+    'nvim-tree/nvim-tree.lua',
+    version = '*',
+    lazy = false,
+    dependencies = {
+      'nvim-tree/nvim-web-devicons',
+    },
+    config = function()
+      require('nvim-tree').setup {}
+    end,
+  },
+
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
